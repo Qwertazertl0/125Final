@@ -6,12 +6,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
+    android:background="@drawable/background"
     tools:context=".MainActivity">
+
+    <ImageView
+        android:id="@+id/noteBackground"
+        android:layout_width="196dp"
+        android:layout_height="164dp"
+        app:layout_constraintBottom_toBottomOf="@+id/frequency"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/note"
+        app:srcCompat="@android:drawable/toast_frame" />
 
     <TextView
         android:id="@+id/note"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="250dp"
         android:text="C"
         android:textAlignment="center"
         android:textColor="@android:color/black"
@@ -26,7 +38,7 @@
         android:id="@+id/frequency"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TextView"
+        android:text="261.625565 Hz"
         android:textAlignment="center"
         android:textColor="@android:color/black"
         android:textSize="24sp"
