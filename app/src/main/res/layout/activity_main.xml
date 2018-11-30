@@ -6,8 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    android:background="@drawable/background"
     tools:context=".MainActivity">
+    <!--android:background="@drawable/background" GOES INSIDE -->
 
     <ImageView
         android:id="@+id/noteBackground"
@@ -66,5 +66,36 @@
         app:layout_constraintBottom_toTopOf="@+id/record"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/accelerometerX"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="67dp"
+        android:layout_marginTop="54dp"
+        android:text="TextView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/noteBackground" />
+
+    <TextView
+        android:id="@+id/accelerometerY"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="38dp"
+        android:text="TextView"
+        app:layout_constraintBaseline_toBaselineOf="@+id/accelerometerX"
+        app:layout_constraintStart_toEndOf="@+id/accelerometerX" />
+
+    <TextView
+        android:id="@+id/angle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="53dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginEnd="52dp"
+        android:text="TextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/accelerometerY"
+        app:layout_constraintTop_toTopOf="@+id/accelerometerY" />
 
 </android.support.constraint.ConstraintLayout>
