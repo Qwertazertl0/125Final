@@ -5,14 +5,24 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
+
+public class MainActivity extends AppCompatActivity implements SensorEventListener {
+    private SensorManager sensorManager;
+    private Sensor accelerometer;
+    private TextView textX, textY, textZ;
 
     private Button set, record;
     private Context context;
@@ -24,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         set = findViewById(R.id.setNote);
         record = findViewById(R.id.record);
         context = this.getApplicationContext();
@@ -64,8 +73,17 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(context, "Finish setting the note first!", Toast.LENGTH_SHORT).show();
             }
         });
-    }
 
+        initializeViews();
+
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
+            accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+        } else {
+            Toast.makeText(context, "No accelerometer dectected", Toast.LENGTH_SHORT).show();
+        }
+    }
     DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
         switch (which){
             case DialogInterface.BUTTON_POSITIVE:
@@ -76,4 +94,29 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
     };
+
+
+    private void initializeViews() {
+        textX = findViewById(R.id.accelerometerX);
+        textY = findViewById(R.id.accelerometerY);
+        textZ = findViewById(R.id.angle);
+    }
+
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
+    public void onSensorChanged(SensorEvent event) {
+        float valueX = event.values[0];
+        float valueY = event.values[1];
+        float valueZ = event.values[2];
+        setAccelValues(valueX, valueY, valueZ);
+    }
+
+    private void setAccelValues(float valueX, float valueY, float valueZ) {
+        double angleA = Math.toDegrees(Math.atan(valueY / valueX));
+        textX.setText(Float.toString(valueX));
+        textY.setText(Float.toString(valueY));
+        textZ.setText(Double.toString(angleA)); // Angle of the device, with 0 being horizontal
+    }
+
+
 }
