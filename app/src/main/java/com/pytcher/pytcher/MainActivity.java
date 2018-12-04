@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Context context;
     private TextView note, freq;
     private boolean isSet = false, isRecord = false;
+    Resources res = getResources();
     private final int DEFAULT_BUTTON_COLOR = 0xFFD6D7D7;
 
     SinBuzzer sinBuzzer = new SinBuzzer(4410);
