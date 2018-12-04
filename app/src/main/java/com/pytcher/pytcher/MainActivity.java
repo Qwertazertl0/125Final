@@ -5,22 +5,16 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.media.AudioFormat;
-import android.media.AudioManager;
-import android.media.AudioTrack;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.TextView;
 
 
 
@@ -28,7 +22,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private SensorManager sensorManager;
     private Sensor accelerometer;
     private TextView textX, textY, textZ;
-
     private Button set, record;
     private Context context;
     private TextView note, freq;
@@ -36,8 +29,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private final int DEFAULT_BUTTON_COLOR = 0xFFD6D7D7;
 
     SinBuzzer sinBuzzer = new SinBuzzer(4410);
-
-
     Thread media = new Thread(sinBuzzer);
 
     @Override
@@ -52,8 +43,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
         set.setOnClickListener((v) -> {
+            sinBuzzer.setPlaySound(!isSet);
             if (!isRecord) {
-                sinBuzzer.setPlaySound(!isSet);
                 if (isSet) {
                     set.getBackground().setTint(DEFAULT_BUTTON_COLOR);
                 } else {
