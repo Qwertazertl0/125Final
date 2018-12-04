@@ -13,7 +13,6 @@ public class Splash extends Activity {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish();

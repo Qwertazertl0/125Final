@@ -1,9 +1,8 @@
 package com.pytcher.pytcher;
 
+import android.media.AudioAttributes;
 import android.media.AudioFormat;
-import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.util.Log;
 
 public class SinBuzzer implements Runnable {
     private AudioTrack mAudioTrack;
@@ -14,19 +13,37 @@ public class SinBuzzer implements Runnable {
     private short[] mBuffer;
 
     private boolean playSound = false;
-    private boolean setUp = false;
+    private boolean setUp;
+    private boolean alive = true;
 
     SinBuzzer(int bufferSize) {
-        setUpTrack();
         this.bufferSize = bufferSize;
+        setUpTrack();
         setUp = true;
     }
 
     public void run() {
-        while (true) {
-            //Log.e("SinBuzzer:", Boolean.toString(mAudioTrack.getState() == 0));
-            playSound();
+        while (alive) {
+            writeToAudioSink(playSound);
         }
+    }
+
+    public void primeAudioSink() {
+        //Prime the buffer to try and avoid underflowing the buffer
+        mAudioTrack.flush();
+        for (int i = 0; i < 5; i++) {
+            writeToAudioSink(true);
+        }
+    }
+
+    public void stop() {
+        mAudioTrack.stop();
+        mAudioTrack.flush();
+        primeAudioSink();
+    }
+
+    public void play() {
+        mAudioTrack.play();
     }
 
     public boolean isSetUp() {
@@ -40,38 +57,31 @@ public class SinBuzzer implements Runnable {
     public void setPlaySound(boolean playSound) {
         this.playSound = playSound;
     }
+
     private void setUpTrack() {
-        int mBufferSize = AudioTrack.getMinBufferSize(44100,
-                AudioFormat.CHANNEL_OUT_MONO,
-                AudioFormat.ENCODING_PCM_16BIT);
+        mAudioTrack = new AudioTrack.Builder()
+                .setAudioAttributes(new AudioAttributes.Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build())
+                .setAudioFormat(new AudioFormat.Builder()
+                        .setSampleRate(44100)
+                        .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                        .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                        .build())
+                .setTransferMode(AudioTrack.MODE_STREAM)
+                .build();
 
-        mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 44100,
-                AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT,
-                mBufferSize, AudioTrack.MODE_STREAM);
-
-        // Sine wave
         mSound = new double[bufferSize];
         mBuffer = new short[bufferSize];
-        //Log.e("Screw you", Integer.toString(mAudioTrack.getState()));
     }
-    private void playSound() {
-        // AudioTrack definition
-        if (playSound) {
+
+    private void writeToAudioSink(boolean canWrite) {
+        if (canWrite) {
             for (int i = 0; i < mSound.length; i++) {
                 mSound[i] = Math.sin((2.0 * Math.PI * frequency / 44100.0 * (double) i));
                 mBuffer[i] = (short) (mSound[i] * Short.MAX_VALUE);
             }
-            //Log.e("SinBuzzer, playSound: ", Boolean.toString(mAudioTrack == null));
-            try {
-                mAudioTrack.play();
-                mAudioTrack.write(mBuffer, 0, mSound.length);
-                mAudioTrack.stop();
-                //mAudioTrack.release();
-            } catch (IllegalStateException e) {
-                e.printStackTrace();
-            }
+            mAudioTrack.write(mBuffer, 0, mSound.length);
         }
     }
-
-
 }

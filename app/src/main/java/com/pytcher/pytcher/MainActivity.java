@@ -19,8 +19,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
     private SensorManager sensorManager;
     private Sensor accelerometer;
@@ -32,7 +30,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private final int DEFAULT_BUTTON_COLOR = 0xFFD6D7D7;
 
     SinBuzzer sinBuzzer = new SinBuzzer(4410);
-    Thread media;
+    Thread playThread = new Thread(sinBuzzer);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,15 +41,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         context = this.getApplicationContext();
         note = findViewById(R.id.note);
         freq = findViewById(R.id.frequency);
-
+        playThread.start();
+        sinBuzzer.primeAudioSink();
 
         set.setOnClickListener((v) -> {
             sinBuzzer.setPlaySound(!isSet);
             if (!isRecord) {
                 if (isSet) {
                     set.getBackground().setTint(DEFAULT_BUTTON_COLOR);
+                    sinBuzzer.stop();
                 } else {
                     set.getBackground().setTint(Color.RED);
+                    sinBuzzer.play();
                     Toast toast = Toast.makeText(context, "You are setting the note now", Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
                     toast.show();
@@ -88,14 +89,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         } else {
             Toast.makeText(context, "No accelerometer dectected", Toast.LENGTH_SHORT).show();
         }
-
-        if (sinBuzzer.isSetUp()) {
-            media = new Thread(sinBuzzer);
-            media.start();
-        } else {
-            Log.e("thread check:", "help");
-        }
     }
+
     DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
         switch (which){
             case DialogInterface.BUTTON_POSITIVE:
@@ -107,7 +102,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     };
 
-
     private void initializeViews() {
         textX = findViewById(R.id.accelerometerX);
         textY = findViewById(R.id.accelerometerY);
@@ -116,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
+
     public void onSensorChanged(SensorEvent event) {
         float valueX = event.values[0];
         float valueY = event.values[1];
