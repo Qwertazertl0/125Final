@@ -10,8 +10,10 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.nfc.Tag;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.widget.Button;
 import android.widget.TextView;
@@ -27,11 +29,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Context context;
     private TextView note, freq;
     private boolean isSet = false, isRecord = false;
-    Resources res = getResources();
     private final int DEFAULT_BUTTON_COLOR = 0xFFD6D7D7;
 
     SinBuzzer sinBuzzer = new SinBuzzer(4410);
-    Thread media = new Thread(sinBuzzer);
+    Thread media;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +89,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             Toast.makeText(context, "No accelerometer dectected", Toast.LENGTH_SHORT).show();
         }
 
-        media.start();
+        if (sinBuzzer.isSetUp()) {
+            media = new Thread(sinBuzzer);
+            media.start();
+        } else {
+            Log.e("thread check:", "help");
+        }
     }
     DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
         switch (which){

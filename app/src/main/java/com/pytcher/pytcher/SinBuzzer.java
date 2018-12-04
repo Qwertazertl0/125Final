@@ -3,6 +3,7 @@ package com.pytcher.pytcher;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.util.Log;
 
 public class SinBuzzer implements Runnable {
     private AudioTrack mAudioTrack;
@@ -13,18 +14,24 @@ public class SinBuzzer implements Runnable {
     private short[] mBuffer;
 
     private boolean playSound = false;
+    private boolean setUp = false;
 
     SinBuzzer(int bufferSize) {
         setUpTrack();
         this.bufferSize = bufferSize;
+        setUp = true;
     }
 
     public void run() {
         while (true) {
+            //Log.e("SinBuzzer:", Boolean.toString(mAudioTrack.getState() == 0));
             playSound();
         }
     }
 
+    public boolean isSetUp() {
+        return setUp;
+    }
 
     public void updateFreq(double frequency) {
         this.frequency = frequency;
@@ -45,6 +52,7 @@ public class SinBuzzer implements Runnable {
         // Sine wave
         mSound = new double[bufferSize];
         mBuffer = new short[bufferSize];
+        //Log.e("Screw you", Integer.toString(mAudioTrack.getState()));
     }
     private void playSound() {
         // AudioTrack definition
@@ -53,10 +61,15 @@ public class SinBuzzer implements Runnable {
                 mSound[i] = Math.sin((2.0 * Math.PI * frequency / 44100.0 * (double) i));
                 mBuffer[i] = (short) (mSound[i] * Short.MAX_VALUE);
             }
-            mAudioTrack.play();
-            mAudioTrack.write(mBuffer, 0, mSound.length);
-            mAudioTrack.stop();
-            mAudioTrack.release();
+            //Log.e("SinBuzzer, playSound: ", Boolean.toString(mAudioTrack == null));
+            try {
+                mAudioTrack.play();
+                mAudioTrack.write(mBuffer, 0, mSound.length);
+                mAudioTrack.stop();
+                //mAudioTrack.release();
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            }
         }
     }
 
