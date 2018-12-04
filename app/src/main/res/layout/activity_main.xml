@@ -6,8 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    tools:context=".MainActivity">
-    <!--android:background="@drawable/background" GOES INSIDE -->
+    tools:context=".MainActivity"
+    android:background="@drawable/background">
 
     <ImageView
         android:id="@+id/noteBackground"

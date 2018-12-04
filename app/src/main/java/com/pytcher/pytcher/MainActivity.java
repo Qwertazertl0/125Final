@@ -10,6 +10,10 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -17,6 +21,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.TextView;
+
 
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
@@ -29,6 +34,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView note, freq;
     private boolean isSet = false, isRecord = false;
     private final int DEFAULT_BUTTON_COLOR = 0xFFD6D7D7;
+
+    SinBuzzer sinBuzzer = new SinBuzzer(4410);
+
+
+    Thread media = new Thread(sinBuzzer);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         set.setOnClickListener((v) -> {
             if (!isRecord) {
+                sinBuzzer.setPlaySound(!isSet);
                 if (isSet) {
                     set.getBackground().setTint(DEFAULT_BUTTON_COLOR);
                 } else {
@@ -83,6 +94,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         } else {
             Toast.makeText(context, "No accelerometer dectected", Toast.LENGTH_SHORT).show();
         }
+
+        media.start();
     }
     DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
         switch (which){
@@ -113,10 +126,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private void setAccelValues(float valueX, float valueY, float valueZ) {
         double angleA = Math.toDegrees(Math.atan(valueY / valueX));
+        sinBuzzer.updateFreq(440 + angleA);
         textX.setText(Float.toString(valueX));
         textY.setText(Float.toString(valueY));
         textZ.setText(Double.toString(angleA)); // Angle of the device, with 0 being horizontal
     }
-
-
 }
