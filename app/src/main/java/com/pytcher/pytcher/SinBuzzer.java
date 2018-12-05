@@ -1,12 +1,17 @@
 package com.pytcher.pytcher;
 
+import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
+import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.util.Log;
+
+import java.util.Arrays;
 
 public class SinBuzzer implements Runnable {
     private AudioTrack mAudioTrack;
-    private double frequency;
+    private double frequency = 530;
     private int bufferSize;
 
     private double[] mSound;
@@ -18,6 +23,8 @@ public class SinBuzzer implements Runnable {
 
     SinBuzzer(int bufferSize) {
         this.bufferSize = bufferSize;
+        mSound = new double[bufferSize];
+        mBuffer = new short[bufferSize];
         setUpTrack();
         setUp = true;
     }
@@ -31,14 +38,16 @@ public class SinBuzzer implements Runnable {
     public void primeAudioSink() {
         //Prime the buffer to try and avoid underflowing the buffer
         mAudioTrack.flush();
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
             writeToAudioSink(true);
         }
+        setUpTrack();
     }
 
     public void stop() {
-        mAudioTrack.stop();
+        mAudioTrack.pause();
         mAudioTrack.flush();
+        mAudioTrack.release();
         primeAudioSink();
     }
 
@@ -69,19 +78,23 @@ public class SinBuzzer implements Runnable {
                         .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
                         .build())
                 .setTransferMode(AudioTrack.MODE_STREAM)
+                .setBufferSizeInBytes(AudioTrack.getMinBufferSize(44100, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT))
                 .build();
-
-        mSound = new double[bufferSize];
-        mBuffer = new short[bufferSize];
     }
 
     private void writeToAudioSink(boolean canWrite) {
         if (canWrite) {
-            for (int i = 0; i < mSound.length; i++) {
-                mSound[i] = Math.sin((2.0 * Math.PI * frequency / 44100.0 * (double) i));
-                mBuffer[i] = (short) (mSound[i] * Short.MAX_VALUE);
+            for (int i = 0; i < mBuffer.length; i++) {
+                mBuffer[i] = (short) (Math.sin((2.0 * Math.PI * frequency / 44100.0 * (double) i)) * Short.MAX_VALUE);
             }
-            mAudioTrack.write(mBuffer, 0, mSound.length);
+
+            try {
+                //Log.e("BUFFER WRITING", Arrays.toString(Arrays.copyOfRange(mBuffer, 0, 5)) + " " + Arrays.toString(Arrays.copyOfRange(mBuffer, mBuffer.length - 5, mBuffer.length)));
+                //Log.e("FREQUENCY", Double.toString(frequency));
+                mAudioTrack.write(mBuffer, 0, Math.min(mBuffer.length, (int) (44100 / frequency)));
+            } catch (NullPointerException nullE) {
+                nullE.printStackTrace();
+            }
         }
     }
 }
