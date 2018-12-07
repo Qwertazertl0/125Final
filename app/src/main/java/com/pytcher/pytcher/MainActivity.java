@@ -28,6 +28,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView note, freq;
     private boolean isSet = false, isRecord = false;
     private final int DEFAULT_BUTTON_COLOR = 0xFFD6D7D7;
+    private final double FREQ_LOG_BASE = 1.059463094359;
+    private final String[] frequencyList = {"A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"};
 
     SinBuzzer sinBuzzer = new SinBuzzer(4410);
     Thread playThread = new Thread(sinBuzzer);
@@ -127,10 +129,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private void setAccelValues(float valueX, float valueY, float valueZ) {
         double angleA = Math.toDegrees(Math.atan(valueY / valueX));
-        sinBuzzer.updateFreq(440 + angleA);
+        double newFreq = Math.abs(angleA) * 2.89 + 261;
+        sinBuzzer.updateFreq(newFreq);
         if (freq != null && note != null) {
-            freq.setText(String.format("%6f Hz", 440 + angleA));
-            note.setText(freqToNote(440 + angleA));
+            freq.setText(String.format("%6f Hz", newFreq));
+            note.setText(freqToNote(newFreq));
         }
         textX.setText(Float.toString(valueX));
         textY.setText(Float.toString(valueY));
@@ -138,6 +141,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private String freqToNote(double freq) {
-        return "C";
+        int halfSteps = (int) Math.round(Math.log(freq / 440) / Math.log(FREQ_LOG_BASE));
+        halfSteps %= 12;
+        if (halfSteps < 0) {
+            halfSteps += 12;
+        }
+        return frequencyList[halfSteps];
     }
 }
