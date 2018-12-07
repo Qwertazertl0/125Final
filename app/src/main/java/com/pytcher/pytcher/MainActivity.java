@@ -41,21 +41,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         context = this.getApplicationContext();
         note = findViewById(R.id.note);
         freq = findViewById(R.id.frequency);
+
         playThread.start();
         sinBuzzer.primeAudioSink();
 
         set.setOnClickListener((v) -> {
-            sinBuzzer.setPlaySound(!isSet);
             if (!isRecord) {
+                sinBuzzer.setPlaySound(!isSet);
                 if (isSet) {
                     set.getBackground().setTint(DEFAULT_BUTTON_COLOR);
                     sinBuzzer.stop();
                 } else {
                     set.getBackground().setTint(Color.RED);
                     sinBuzzer.play();
-                    Toast toast = Toast.makeText(context, "You are setting the note now", Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
-                    toast.show();
+//                    Toast toast = Toast.makeText(context, "You are setting the note now", Toast.LENGTH_SHORT);
+//                    toast.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
+//                    toast.show();
                 }
                 isSet = !isSet;
             } else {
@@ -65,14 +66,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         record.setOnClickListener((v) -> {
             if (!isSet) {
+                sinBuzzer.setPlaySound(!isRecord);
                 if (isRecord) {
                     record.getBackground().setTint(DEFAULT_BUTTON_COLOR);
+                    sinBuzzer.stop();
+
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                     builder.setMessage("Would you like to save and edit your recording?").setPositiveButton("Yes", dialogClickListener)
                             .setNegativeButton("No", dialogClickListener).show();
                 } else {
                     record.getBackground().setTint(Color.RED);
-                    Toast.makeText(context, "You are recording now", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(context, "You are recording now", Toast.LENGTH_SHORT).show();
+                    sinBuzzer.setRecord(true);
+                    sinBuzzer.play();
                 }
                 isRecord = !isRecord;
             } else {
@@ -95,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         switch (which){
             case DialogInterface.BUTTON_POSITIVE:
                 Intent intent = new Intent(MainActivity.this, EditActivity.class);
+                //intent.putExtra("Recording", sinBuzzer.getRecordedSound());
                 startActivity(intent);
                 break;
             case DialogInterface.BUTTON_NEGATIVE:
@@ -121,8 +128,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private void setAccelValues(float valueX, float valueY, float valueZ) {
         double angleA = Math.toDegrees(Math.atan(valueY / valueX));
         sinBuzzer.updateFreq(440 + angleA);
+        if (freq != null && note != null) {
+            freq.setText(String.format("%6f Hz", 440 + angleA));
+            note.setText(freqToNote(440 + angleA));
+        }
         textX.setText(Float.toString(valueX));
         textY.setText(Float.toString(valueY));
         textZ.setText(Double.toString(angleA)); // Angle of the device, with 0 being horizontal
+    }
+
+    private String freqToNote(double freq) {
+        return "C";
     }
 }

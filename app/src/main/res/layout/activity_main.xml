@@ -24,7 +24,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="250dp"
-        android:text="C"
         android:textAlignment="center"
         android:textColor="@android:color/black"
         android:textSize="80sp"
@@ -38,14 +37,12 @@
         android:id="@+id/frequency"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="261.625565 Hz"
         android:textAlignment="center"
         android:textColor="@android:color/black"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/note"
-        tools:text="261.625565 Hz" />
+        app:layout_constraintTop_toBottomOf="@+id/note" />
 
     <Button
         android:id="@+id/record"
