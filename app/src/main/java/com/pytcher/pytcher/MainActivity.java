@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private final double FREQ_LOG_BASE = 1.059463094359;
     private final String[] frequencyList = {"A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"};
 
-    SinBuzzer sinBuzzer = new SinBuzzer(4410);
+    SinBuzzer sinBuzzer = new SinBuzzer();
     Thread playThread = new Thread(sinBuzzer);
 
     @Override
@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 } else {
                     record.getBackground().setTint(Color.RED);
 //                    Toast.makeText(context, "You are recording now", Toast.LENGTH_SHORT).show();
-                    sinBuzzer.setRecord(true);
+//                    sinBuzzer.setRecord(true);
                     sinBuzzer.play();
                 }
                 isRecord = !isRecord;
@@ -131,6 +131,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         double angleA = Math.toDegrees(Math.atan(valueY / valueX));
         double newFreq = Math.abs(angleA) * 2.89 + 261;
         sinBuzzer.updateFreq(newFreq);
+//        sinBuzzer.updateFreq(392);
         if (freq != null && note != null) {
             freq.setText(String.format("%6f Hz", newFreq));
             note.setText(freqToNote(newFreq));
