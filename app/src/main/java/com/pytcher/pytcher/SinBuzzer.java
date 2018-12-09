@@ -1,38 +1,31 @@
 package com.pytcher.pytcher;
 
-import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
-import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.support.v4.content.res.TypedArrayUtils;
-import android.util.Log;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.io.IOException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 
 public class SinBuzzer implements Runnable {
     private AudioTrack mAudioTrack;
+    private Executor executor;
     private double frequency = 530;
     private int bufferSize;
 
-    private double[] mSound;
     private short[] mBuffer;
-    private List<Short> recordedBuffers;
-    private Short[] recordedSound;
 
     private boolean playSound = false;
     private boolean setUp;
     private boolean alive = true;
     private boolean record = false;
 
-    SinBuzzer(int bufferSize) {
+    SinBuzzer(int bufferSize) throws IOException {
         this.bufferSize = bufferSize;
-        mSound = new double[bufferSize];
         mBuffer = new short[bufferSize];
-        recordedBuffers = new LinkedList<>();
+        executor = Executors.newSingleThreadExecutor();
         setUpTrack();
         setUp = true;
     }
@@ -44,7 +37,6 @@ public class SinBuzzer implements Runnable {
     }
 
     public void primeAudioSink() {
-        //Prime the buffer to try and avoid underflowing the buffer
         mAudioTrack.flush();
         for (int i = 0; i < 5; i++) {
             writeToAudioSink(true);
@@ -57,10 +49,8 @@ public class SinBuzzer implements Runnable {
         mAudioTrack.flush();
         mAudioTrack.release();
         primeAudioSink();
-//        if (record) {
-//            record = false;
-//            recordedSound = (Short[]) recordedBuffers.toArray();
-//        }
+
+        record = false;
     }
 
     public void play() {
@@ -81,10 +71,6 @@ public class SinBuzzer implements Runnable {
 
     public void setRecord(boolean rec) {
         this.record = rec;
-    }
-
-    public Short[] getRecordedSound() {
-        return recordedSound;
     }
 
     private void setUpTrack() {
@@ -109,17 +95,14 @@ public class SinBuzzer implements Runnable {
             }
 
             try {
-                //Log.e("BUFFER WRITING", Arrays.toString(Arrays.copyOfRange(mBuffer, 0, 5)) + " " + Arrays.toString(Arrays.copyOfRange(mBuffer, mBuffer.length - 5, mBuffer.length)));
-                //Log.e("FREQUENCY", Double.toString(frequency));
                 mAudioTrack.write(mBuffer, 0, Math.min(mBuffer.length, (int) (44100 / frequency)));
-//                if (record) {
-//                    for (short sh : mBuffer) {
-//                        recordedBuffers.add(sh);
-//                    }
-//                }
+                if (record) {
+                    executor.execute(() -> MainActivity.writeToCSV(mBuffer, Math.min(mBuffer.length, (int) (44100 / frequency))));
+                }
             } catch (NullPointerException nullE) {
                 nullE.printStackTrace();
             }
         }
     }
+
 }

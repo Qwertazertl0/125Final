@@ -19,6 +19,11 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
     private SensorManager sensorManager;
     private Sensor accelerometer;
@@ -26,13 +31,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Button set, record;
     private Context context;
     private TextView note, freq;
+    static private BufferedWriter bufferedWriter;
     private boolean isSet = false, isRecord = false;
     private final int DEFAULT_BUTTON_COLOR = 0xFFD6D7D7;
     private final double FREQ_LOG_BASE = 1.059463094359;
     private final String[] frequencyList = {"A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"};
+    private File recording;
+
 
     SinBuzzer sinBuzzer = new SinBuzzer(4410);
     Thread playThread = new Thread(sinBuzzer);
+
+    public MainActivity() throws IOException {
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,9 +54,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         context = this.getApplicationContext();
         note = findViewById(R.id.note);
         freq = findViewById(R.id.frequency);
+        recording = new File(context.getFilesDir(), "recording.csv");
 
         playThread.start();
         sinBuzzer.primeAudioSink();
+        try {
+            bufferedWriter = new BufferedWriter(new FileWriter(recording));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         set.setOnClickListener((v) -> {
             if (!isRecord) {
@@ -56,9 +73,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 } else {
                     set.getBackground().setTint(Color.RED);
                     sinBuzzer.play();
-//                    Toast toast = Toast.makeText(context, "You are setting the note now", Toast.LENGTH_SHORT);
-//                    toast.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
-//                    toast.show();
                 }
                 isSet = !isSet;
             } else {
@@ -74,11 +88,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     sinBuzzer.stop();
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder.setMessage("Would you like to save and edit your recording?").setPositiveButton("Yes", dialogClickListener)
+                    builder.setMessage("Would you like to playback your recording?").setPositiveButton("Yes", dialogClickListener)
                             .setNegativeButton("No", dialogClickListener).show();
                 } else {
                     record.getBackground().setTint(Color.RED);
-//                    Toast.makeText(context, "You are recording now", Toast.LENGTH_SHORT).show();
                     sinBuzzer.setRecord(true);
                     sinBuzzer.play();
                 }
@@ -99,11 +112,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        recording = new File(context.getFilesDir(), "recording.csv");
+    }
+
     DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
         switch (which){
             case DialogInterface.BUTTON_POSITIVE:
                 Intent intent = new Intent(MainActivity.this, EditActivity.class);
-                //intent.putExtra("Recording", sinBuzzer.getRecordedSound());
                 startActivity(intent);
                 break;
             case DialogInterface.BUTTON_NEGATIVE:
@@ -147,5 +165,27 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             halfSteps += 12;
         }
         return frequencyList[halfSteps];
+    }
+
+    public static void writeToCSV(short[] buffer, int length) {
+        int counter = 0;
+        boolean newline = false;
+        try {
+            for (int i = 0; i < Math.min(buffer.length, length + 1); i++) {
+                bufferedWriter.append(",");
+                bufferedWriter.append(Short.toString(buffer[i]));
+                counter++;
+                if (counter > 100) {
+                    bufferedWriter.newLine();
+                    counter -= 100;
+                    newline = true;
+                }
+            }
+            if (!newline) {
+                bufferedWriter.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
