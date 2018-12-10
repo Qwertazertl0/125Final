@@ -22,11 +22,11 @@ import android.widget.Toast;
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
     private SensorManager sensorManager;
     private Sensor accelerometer;
-    private TextView textX, textY, textZ;
-    private Button set, record;
+
+    private Button set, record, lock;
     private Context context;
     private TextView note, freq;
-    private boolean isSet = false, isRecord = false;
+    private boolean isSet = false, isRecord = false, scaleLock = false;
     private final int DEFAULT_BUTTON_COLOR = 0xFFD6D7D7;
     private final double FREQ_LOG_BASE = 1.059463094359;
     private final String[] frequencyList = {"A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"};
@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setContentView(R.layout.activity_main);
         set = findViewById(R.id.setNote);
         record = findViewById(R.id.record);
+        lock = findViewById(R.id.scaleToggle);
         context = this.getApplicationContext();
         note = findViewById(R.id.note);
         freq = findViewById(R.id.frequency);
@@ -88,14 +89,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });
 
-        initializeViews();
+        lock.setOnClickListener((v) -> {
+            scaleLock = !scaleLock;
+            if (scaleLock) {
+                lock.getBackground().setTint(Color.RED);
+            } else {
+                lock.getBackground().setTint(DEFAULT_BUTTON_COLOR);
+            }
+        });
+
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
             accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
             sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
         } else {
-            Toast.makeText(context, "No accelerometer dectected", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "No accelerometer detected", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -111,12 +120,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     };
 
-    private void initializeViews() {
-        textX = findViewById(R.id.accelerometerX);
-        textY = findViewById(R.id.accelerometerY);
-        textZ = findViewById(R.id.angle);
-    }
-
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 
@@ -130,15 +133,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private void setAccelValues(float valueX, float valueY, float valueZ) {
         double angleA = Math.toDegrees(Math.atan(valueY / valueX));
         double newFreq = Math.abs(angleA) * 2.89 + 261;
-        sinBuzzer.updateFreq(newFreq);
-//        sinBuzzer.updateFreq(392);
+        if (!scaleLock) {
+            sinBuzzer.updateFreq(newFreq);
+        } else {
+            int halfSteps = (int) Math.round(Math.log(newFreq / 440) / Math.log(FREQ_LOG_BASE));
+            halfSteps %= 12;
+            if (halfSteps < 0) {
+                halfSteps += 12;
+            }
+            sinBuzzer.updateFreq(440 * Math.pow(FREQ_LOG_BASE, halfSteps));
+        }
+
         if (freq != null && note != null) {
             freq.setText(String.format("%6f Hz", newFreq));
             note.setText(freqToNote(newFreq));
         }
-        textX.setText(Float.toString(valueX));
-        textY.setText(Float.toString(valueY));
-        textZ.setText(Double.toString(angleA)); // Angle of the device, with 0 being horizontal
     }
 
     private String freqToNote(double freq) {

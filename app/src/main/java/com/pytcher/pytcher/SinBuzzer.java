@@ -13,13 +13,14 @@ public class SinBuzzer implements Runnable {
     private short[] mBuffer;
 
     private boolean playSound = false;
-    private boolean setUp;
+    private boolean setUp = true;
     private boolean alive = true;
     private int sampleRate = 44100;
 
+    private double volume = 1;
+
     SinBuzzer() {
         setUpTrack();
-        setUp = true;
     }
 
     public void run() {
@@ -54,6 +55,10 @@ public class SinBuzzer implements Runnable {
         this.frequency = frequency;
     }
 
+    public void updateVolume(double volume) {
+        this.volume = volume;
+    }
+
     public void setPlaySound(boolean playSound) {
         this.playSound = playSound;
     }
@@ -70,14 +75,11 @@ public class SinBuzzer implements Runnable {
                         .build())
                 .setTransferMode(AudioTrack.MODE_STREAM)
                 .build();
-
-//        mSound = new double[bufferSize];
-//        mBuffer = new short[bufferSize];
     }
 
     private void writeToAudioSink(boolean canWrite) {
 
-        System.out.println(sampleRate + " " + frequency);
+//        System.out.println(sampleRate + " " + frequency);
         int bufferSize = (int) (sampleRate / frequency);
         mSound = new double[bufferSize];
         mBuffer = new short[bufferSize];

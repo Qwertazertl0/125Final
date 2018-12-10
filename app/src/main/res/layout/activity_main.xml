@@ -5,18 +5,20 @@
     android:id="@+id/linearLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/background"
     android:gravity="center"
-    tools:context=".MainActivity"
-    android:background="@drawable/background">
+    tools:context=".MainActivity">
 
     <ImageView
         android:id="@+id/noteBackground"
         android:layout_width="196dp"
-        android:layout_height="164dp"
-        app:layout_constraintBottom_toBottomOf="@+id/frequency"
+        android:layout_height="0dp"
+        android:layout_marginTop="65dp"
+        android:layout_marginBottom="234dp"
+        app:layout_constraintBottom_toTopOf="@+id/setNote"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/note"
+        app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@android:drawable/toast_frame" />
 
     <TextView
@@ -46,53 +48,33 @@
 
     <Button
         android:id="@+id/record"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="48dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginStart="8dp"
         android:text="Record"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toEndOf="@+id/setNote" />
 
     <Button
         android:id="@+id/setNote"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
         android:text="@string/set"
-        app:layout_constraintBottom_toTopOf="@+id/record"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/record"
+        app:layout_constraintStart_toEndOf="@+id/scaleToggle" />
+
+    <Button
+        android:id="@+id/scaleToggle"
+        android:layout_width="140dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="scaleLock"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/setNote"
         app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView
-        android:id="@+id/accelerometerX"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="67dp"
-        android:layout_marginTop="54dp"
-        android:text="TextView"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/noteBackground" />
-
-    <TextView
-        android:id="@+id/accelerometerY"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="38dp"
-        android:text="TextView"
-        app:layout_constraintBaseline_toBaselineOf="@+id/accelerometerX"
-        app:layout_constraintStart_toEndOf="@+id/accelerometerX" />
-
-    <TextView
-        android:id="@+id/angle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="53dp"
-        android:layout_marginTop="1dp"
-        android:layout_marginEnd="52dp"
-        android:text="TextView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/accelerometerY"
-        app:layout_constraintTop_toTopOf="@+id/accelerometerY" />
 
 </android.support.constraint.ConstraintLayout>

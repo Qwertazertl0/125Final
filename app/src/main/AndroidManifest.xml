@@ -9,9 +9,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Splash"
-            android:theme="@style/SplashTheme"
-            >
+        <activity
+            android:name=".Splash"
+            android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -20,6 +20,16 @@
         </activity>
         <activity android:name=".EditActivity" />
         <activity android:name=".MainActivity" />
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.pytcher.pytcher.MainActivity" />
+        </activity>
+        <activity android:name=".preferences" />
+        <activity android:name=".Preferences" />
     </application>
 
 </manifest>
