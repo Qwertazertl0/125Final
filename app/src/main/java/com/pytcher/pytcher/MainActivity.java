@@ -138,9 +138,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         } else {
             int halfSteps = (int) Math.round(Math.log(newFreq / 440) / Math.log(FREQ_LOG_BASE));
             halfSteps %= 12;
-            if (halfSteps < 0) {
-                halfSteps += 12;
-            }
             sinBuzzer.updateFreq(440 * Math.pow(FREQ_LOG_BASE, halfSteps));
         }
 
