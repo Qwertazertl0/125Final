@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
 
         if (freq != null && note != null) {
-            freq.setText(String.format("%1f Hz", newFreq));
+            freq.setText(String.format("%.1f Hz", newFreq));
             note.setText(freqToNote(newFreq));
         }
     }
