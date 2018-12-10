@@ -12,13 +12,12 @@
     <ImageView
         android:id="@+id/noteBackground"
         android:layout_width="196dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="65dp"
-        android:layout_marginBottom="234dp"
-        app:layout_constraintBottom_toTopOf="@+id/playNote"
+        android:layout_height="162dp"
+        app:layout_constraintBottom_toBottomOf="@+id/frequency"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/note"
+        app:layout_constraintVertical_bias="0.32999998"
         app:srcCompat="@android:drawable/toast_frame" />
 
     <TextView
@@ -50,6 +49,7 @@
         android:id="@+id/playNote"
         android:layout_width="133dp"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
         android:text="Play"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -59,9 +59,12 @@
         android:id="@+id/scaleToggle"
         android:layout_width="140dp"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
         android:text="scaleLock"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/playNote"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/noteBackground"
+        app:layout_constraintVertical_bias="1.0" />
 
 </android.support.constraint.ConstraintLayout>
