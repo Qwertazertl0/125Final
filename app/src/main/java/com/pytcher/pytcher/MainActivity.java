@@ -82,19 +82,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private void setAccelValues(float valueX, float valueY, float valueZ) {
-        double angleA = Math.toDegrees(Math.atan(valueY / valueX));
-        double newFreq = Math.abs(angleA) * 2.89 + 261;
+        double angleA = Math.toDegrees(Math.atan2(valueY, valueX));
+        double newFreq = angleA * 2.89 + 261;
+        System.out.println(angleA);
         if (!scaleLock) {
             sinBuzzer.updateFreq(newFreq);
+            if (freq != null && note != null) {
+                freq.setText(String.format("%.1f Hz", newFreq));
+                note.setText(freqToNote(newFreq));
+            }
         } else {
             int halfSteps = (int) Math.round(Math.log(newFreq / 440) / Math.log(FREQ_LOG_BASE));
             halfSteps %= 12;
-            sinBuzzer.updateFreq(440 * Math.pow(FREQ_LOG_BASE, halfSteps));
-        }
-
-        if (freq != null && note != null) {
-            freq.setText(String.format("%1f Hz", newFreq));
-            note.setText(freqToNote(newFreq));
+            double noteFreq = 440 * Math.pow(FREQ_LOG_BASE, halfSteps);
+            sinBuzzer.updateFreq(noteFreq);
+            if (freq != null && note != null) {
+                freq.setText(String.format("%.1f Hz", noteFreq));
+                note.setText(freqToNote(newFreq));
+            }
         }
     }
 
