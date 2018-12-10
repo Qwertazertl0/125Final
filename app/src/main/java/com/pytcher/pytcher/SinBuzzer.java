@@ -7,13 +7,11 @@ import android.media.AudioTrack;
 public class SinBuzzer implements Runnable {
     private AudioTrack mAudioTrack;
     private double frequency = 440;
-    private int bufferSize = 4410;
 
     private double[] mSound;
     private short[] mBuffer;
 
     private boolean playSound = false;
-    private boolean setUp = true;
     private boolean alive = true;
     private int sampleRate = 44100;
 
@@ -47,10 +45,6 @@ public class SinBuzzer implements Runnable {
         mAudioTrack.play();
     }
 
-    public boolean isSetUp() {
-        return setUp;
-    }
-
     public void updateFreq(double frequency) {
         this.frequency = frequency;
     }
@@ -78,8 +72,6 @@ public class SinBuzzer implements Runnable {
     }
 
     private void writeToAudioSink(boolean canWrite) {
-
-//        System.out.println(sampleRate + " " + frequency);
         int bufferSize = (int) (sampleRate / frequency);
         mSound = new double[bufferSize];
         mBuffer = new short[bufferSize];
