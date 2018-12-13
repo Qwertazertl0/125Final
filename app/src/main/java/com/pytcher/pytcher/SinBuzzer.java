@@ -17,9 +17,8 @@ public class SinBuzzer implements Runnable {
     public static final int SIN_WAVE = 0;
     public static final int SQUARE_WAVE = 1;
     public static final int SAWTOOTH_WAVE = 2;
-    private int[] modes = {SIN_WAVE, SQUARE_WAVE, SAWTOOTH_WAVE};
     private String[] modeNames = {"Sine", "Square", "Sawtooth"};
-    private int mode = modes[0];
+    private int mode = SIN_WAVE;
 
 
     SinBuzzer() {
@@ -42,7 +41,7 @@ public class SinBuzzer implements Runnable {
 
 
     public void toggleMode() {
-        mode = (mode + 1) % modes.length;
+        mode = (mode + 1) % modeNames.length;
     }
     /**
      * Sets the different wave types.

@@ -23,9 +23,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView note, freq;
     private boolean isPlay = false, scaleLock = false;
     private final int DEFAULT_BUTTON_COLOR = 0xFFD6D7D7;
-    private final double FREQ_LOG_BASE = 1.059463094359;
+    protected final static double FREQ_LOG_BASE = 1.059463094359;
     private final String[] frequencyList = {"A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"};
 
+    PitchConverter pitchConverter = new PitchConverter();
     SinBuzzer sinBuzzer = new SinBuzzer();
     Thread playThread = new Thread(sinBuzzer);
 
@@ -57,12 +58,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });
 
         lock.setOnClickListener((v) -> {
-            scaleLock = !scaleLock;
-            if (scaleLock) {
-                lock.getBackground().setTint(Color.RED);
-            } else {
-                lock.getBackground().setTint(DEFAULT_BUTTON_COLOR);
-            }
+            pitchConverter.toggleScale();
+            lock.setText(pitchConverter.getScaleName());
         });
 
         mode.setOnClickListener((v) -> {
@@ -91,25 +88,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private void setAccelValues(float valueX, float valueY, float valueZ) {
-        double angleA = Math.toDegrees(Math.atan2(valueY, valueX));
-        double newFreq = (Math.abs(angleA)) * 1.44 + 261;
-        //System.out.println(angleA);
-        if (!scaleLock) {
-            sinBuzzer.updateFreq(newFreq);
-            if (freq != null && note != null) {
-                freq.setText(String.format("%.1f Hz", newFreq));
-                note.setText(freqToNote(newFreq));
-            }
-        } else {
-            int halfSteps = (int) Math.round(Math.log(newFreq / 440) / Math.log(FREQ_LOG_BASE));
-            halfSteps %= 12;
-            double noteFreq = 440 * Math.pow(FREQ_LOG_BASE, halfSteps);
-            sinBuzzer.updateFreq(noteFreq);
-            if (freq != null && note != null) {
-                freq.setText(String.format("%.1f Hz", noteFreq));
-                note.setText(freqToNote(newFreq));
-            }
-        }
+        double angle = Math.toDegrees(Math.atan2(valueY, valueX));
+        System.out.println(angle);
+
+        double frequency = pitchConverter.getFrequency(angle);
+        sinBuzzer.updateFreq(frequency);
+        freq.setText(String.format("%.1f Hz", frequency));
+        note.setText(freqToNote(frequency));
     }
 
     private String freqToNote(double freq) {
