@@ -6,6 +6,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Button;
@@ -16,7 +17,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private SensorManager sensorManager;
     private Sensor accelerometer;
 
-    private Button play, lock;
+    private Button lock, mode;
+    private FloatingActionButton play;
     private Context context;
     private TextView note, freq;
     private boolean isPlay = false, scaleLock = false;
@@ -36,18 +38,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         context = this.getApplicationContext();
         note = findViewById(R.id.note);
         freq = findViewById(R.id.frequency);
+        mode = findViewById(R.id.modeToggle);
 
         playThread.start();
         sinBuzzer.primeAudioSink();
 
         play.setOnClickListener((v) -> {
-            if (isPlay) {
+            System.out.println("IsPlay: " + isPlay);
+            if (!isPlay) {
                 sinBuzzer.setPlaySound(true);
-                play.getBackground().setTint(Color.RED);
                 sinBuzzer.play();
+                play.setImageResource(R.drawable.ic_round_pause_24px);
             } else {
-                play.getBackground().setTint(DEFAULT_BUTTON_COLOR);
                 sinBuzzer.stop();
+                play.setImageResource(R.drawable.ic_round_play_arrow_24px);
             }
             isPlay = !isPlay;
         });
@@ -59,6 +63,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             } else {
                 lock.getBackground().setTint(DEFAULT_BUTTON_COLOR);
             }
+        });
+
+        mode.setOnClickListener((v) -> {
+            sinBuzzer.toggleMode();
+            mode.setText(sinBuzzer.getModeName());
         });
 
 
@@ -83,8 +92,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private void setAccelValues(float valueX, float valueY, float valueZ) {
         double angleA = Math.toDegrees(Math.atan2(valueY, valueX));
-        double newFreq = Math.abs(angleA) * 1.44 + 261;
-        System.out.println(angleA);
+        double newFreq = (Math.abs(angleA)) * 1.44 + 261;
+        //System.out.println(angleA);
         if (!scaleLock) {
             sinBuzzer.updateFreq(newFreq);
             if (freq != null && note != null) {
