@@ -72,7 +72,7 @@ public class SinBuzzer implements Runnable {
     }
 
     private void writeToAudioSink(boolean canWrite) {
-        int bufferSize = (int) (sampleRate / frequency);
+        int bufferSize = (int) (sampleRate / Math.abs(frequency));
         mSound = new double[bufferSize];
         mBuffer = new short[bufferSize];
         if (canWrite) {

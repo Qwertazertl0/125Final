@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private void setAccelValues(float valueX, float valueY, float valueZ) {
         double angleA = Math.toDegrees(Math.atan2(valueY, valueX));
-        double newFreq = angleA * 2.89 + 261;
+        double newFreq = Math.abs(angleA) * 1.44 + 261;
         System.out.println(angleA);
         if (!scaleLock) {
             sinBuzzer.updateFreq(newFreq);
