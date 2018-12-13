@@ -6,6 +6,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Button;
@@ -16,14 +17,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private SensorManager sensorManager;
     private Sensor accelerometer;
 
-    private Button play, lock;
+    private Button lock, mode;
+    private FloatingActionButton play;
     private Context context;
     private TextView note, freq;
     private boolean isPlay = false, scaleLock = false;
     private final int DEFAULT_BUTTON_COLOR = 0xFFD6D7D7;
-    private final double FREQ_LOG_BASE = 1.059463094359;
+    protected final static double FREQ_LOG_BASE = 1.059463094359;
     private final String[] frequencyList = {"A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"};
 
+    PitchConverter pitchConverter = new PitchConverter();
     SinBuzzer sinBuzzer = new SinBuzzer();
     Thread playThread = new Thread(sinBuzzer);
 
@@ -36,29 +39,32 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         context = this.getApplicationContext();
         note = findViewById(R.id.note);
         freq = findViewById(R.id.frequency);
+        mode = findViewById(R.id.modeToggle);
 
         playThread.start();
         sinBuzzer.primeAudioSink();
 
         play.setOnClickListener((v) -> {
-            if (isPlay) {
+            System.out.println("IsPlay: " + isPlay);
+            if (!isPlay) {
                 sinBuzzer.setPlaySound(true);
-                play.getBackground().setTint(Color.RED);
                 sinBuzzer.play();
+                play.setImageResource(R.drawable.ic_round_pause_24px);
             } else {
-                play.getBackground().setTint(DEFAULT_BUTTON_COLOR);
                 sinBuzzer.stop();
+                play.setImageResource(R.drawable.ic_round_play_arrow_24px);
             }
             isPlay = !isPlay;
         });
 
         lock.setOnClickListener((v) -> {
-            scaleLock = !scaleLock;
-            if (scaleLock) {
-                lock.getBackground().setTint(Color.RED);
-            } else {
-                lock.getBackground().setTint(DEFAULT_BUTTON_COLOR);
-            }
+            pitchConverter.toggleScale();
+            lock.setText(pitchConverter.getScaleName());
+        });
+
+        mode.setOnClickListener((v) -> {
+            sinBuzzer.toggleMode();
+            mode.setText(sinBuzzer.getModeName());
         });
 
 
@@ -82,25 +88,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private void setAccelValues(float valueX, float valueY, float valueZ) {
-        double angleA = Math.toDegrees(Math.atan2(valueY, valueX));
-        double newFreq = (Math.abs(angleA)) * 1.44 + 261;
-        //System.out.println(angleA);
-        if (!scaleLock) {
-            sinBuzzer.updateFreq(newFreq);
-            if (freq != null && note != null) {
-                freq.setText(String.format("%.1f Hz", newFreq));
-                note.setText(freqToNote(newFreq));
-            }
-        } else {
-            int halfSteps = (int) Math.round(Math.log(newFreq / 440) / Math.log(FREQ_LOG_BASE));
-            halfSteps %= 12;
-            double noteFreq = 440 * Math.pow(FREQ_LOG_BASE, halfSteps);
-            sinBuzzer.updateFreq(noteFreq);
-            if (freq != null && note != null) {
-                freq.setText(String.format("%.1f Hz", noteFreq));
-                note.setText(freqToNote(newFreq));
-            }
-        }
+
+        double angle = Math.toDegrees(Math.atan2(valueY, valueX));
+        System.out.println(angle);
+
+        double frequency = pitchConverter.getFrequency(angle);
+        sinBuzzer.updateFreq(frequency);
+        freq.setText(String.format("%.1f Hz", frequency));
+        note.setText(freqToNote(frequency));
     }
 
     private String freqToNote(double freq) {

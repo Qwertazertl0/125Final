@@ -8,14 +8,18 @@ public class SinBuzzer implements Runnable {
     private AudioTrack mAudioTrack;
     private double frequency = 440;
 
-    private double[] mSound;
-    private short[] mBuffer;
-
     private boolean playSound = false;
     private boolean alive = true;
     private int sampleRate = 44100;
 
     private double volume = 1;
+
+    public static final int SIN_WAVE = 0;
+    public static final int SQUARE_WAVE = 1;
+    public static final int SAWTOOTH_WAVE = 2;
+    private String[] modeNames = {"Sine", "Square", "Sawtooth"};
+    private int mode = SIN_WAVE;
+
 
     SinBuzzer() {
         setUpTrack();
@@ -23,7 +27,7 @@ public class SinBuzzer implements Runnable {
 
     public void run() {
         while (alive) {
-            writeToAudioSink(playSound);
+            writeToAudioSink();
         }
     }
 
@@ -31,17 +35,36 @@ public class SinBuzzer implements Runnable {
         //Prime the buffer to try and avoid underflowing the buffer
         mAudioTrack.flush();
         for (int i = 0; i < 5; i++) {
-            writeToAudioSink(true);
+            writeToAudioSink();
         }
     }
 
+
+    public void toggleMode() {
+        mode = (mode + 1) % modeNames.length;
+    }
+    /**
+     * Sets the different wave types.
+     * @param mode the mode
+     */
+    public void setMode(int mode) {
+        this.mode = mode;
+    }
+
+    public String getModeName() {
+        return modeNames[mode];
+    }
+
+
     public void stop() {
+        playSound = false;
         mAudioTrack.stop();
         mAudioTrack.flush();
         primeAudioSink();
     }
 
     public void play() {
+        playSound = true;
         mAudioTrack.play();
     }
 
@@ -71,17 +94,59 @@ public class SinBuzzer implements Runnable {
                 .build();
     }
 
-    private void writeToAudioSink(boolean canWrite) {
-        int bufferSize = (int) (sampleRate / frequency);
-        mSound = new double[bufferSize];
-        mBuffer = new short[bufferSize];
-        if (canWrite) {
-            double period = (double) sampleRate / frequency;
-            for (int i = 0; i < mSound.length; i++) {
-                mSound[i] = Math.sin((2.0 * Math.PI * (double) i) / period);
-                mBuffer[i] = (short) (mSound[i] * Short.MAX_VALUE);
+    private void writeToAudioSink() {
+        if (playSound) {
+            int bufferSize = (int) (sampleRate / Math.abs(frequency));
+            short[] mBuffer;
+            switch (mode) {
+                case SIN_WAVE: mBuffer = generateSinWave(bufferSize);
+                break;
+                case SQUARE_WAVE: mBuffer = generateSquareWave(bufferSize);
+                break;
+                case SAWTOOTH_WAVE: mBuffer = generateSawtoothWave(bufferSize);
+                break;
+                default: mBuffer = generateSinWave(bufferSize);
             }
-            mAudioTrack.write(mBuffer, 0, mSound.length);
+            mAudioTrack.write(mBuffer, 0, mBuffer.length);
         }
+    }
+
+    private short[] generateSinWave(int bufferSize) {
+        double[] mSound = new double[bufferSize];
+        short[] mBuffer = new short[bufferSize];
+        double period = (double) sampleRate / frequency;
+        for (int i = 0; i < mSound.length; i++) {
+            mSound[i] = Math.sin((2.0 * Math.PI * (double) i) / period);
+            mBuffer[i] = (short) (mSound[i] * Short.MAX_VALUE);
+        }
+        return mBuffer;
+    }
+
+    private short[] generateSquareWave(int bufferSize) {
+        double[] mSound = new double[bufferSize];
+        short[] mBuffer = new short[bufferSize];
+        double period = (double) sampleRate / frequency;
+        for (int i = 0; i < mSound.length; i++) {
+            mSound[i] = Math.sin((2.0 * Math.PI * (double) i) / period);
+            if (mSound[i] > 0) {
+                // Divide by twenty to make sounds sound equal
+                mBuffer[i] = Short.MAX_VALUE / 20;
+            } else {
+                mBuffer[i] = -1 * Short.MAX_VALUE / 20;
+            }
+        }
+        return mBuffer;
+    }
+
+    private short[] generateSawtoothWave(int bufferSize) {
+        double[] mSound = new double[bufferSize];
+        short[] mBuffer = new short[bufferSize];
+        double period = (double) sampleRate / frequency;
+        for (int i = 0; i < mSound.length; i++) {
+            //  https://stackoverflow.com/questions/17604968/generate-sawtooth-tone-in-java-android
+            mSound[i] = 2 * (i % (sampleRate / frequency)) / (sampleRate / frequency) - 1;
+            mBuffer[i] = (short) (mSound[i] * Short.MAX_VALUE / 20);
+        }
+        return mBuffer;
     }
 }
