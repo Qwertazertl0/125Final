@@ -31,14 +31,6 @@ public class SinBuzzer implements Runnable {
         }
     }
 
-    public void primeAudioSink() {
-        //Prime the buffer to try and avoid underflowing the buffer
-        mAudioTrack.flush();
-        for (int i = 0; i < 5; i++) {
-            writeToAudioSink();
-        }
-    }
-
 
     public void toggleMode() {
         mode = (mode + 1) % modeNames.length;
@@ -60,7 +52,6 @@ public class SinBuzzer implements Runnable {
         playSound = false;
         mAudioTrack.stop();
         mAudioTrack.flush();
-        primeAudioSink();
     }
 
     public void play() {
