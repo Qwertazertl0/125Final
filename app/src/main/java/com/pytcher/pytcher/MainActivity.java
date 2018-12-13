@@ -88,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private void setAccelValues(float valueX, float valueY, float valueZ) {
+
         double angle = Math.toDegrees(Math.atan2(valueY, valueX));
         System.out.println(angle);
 
