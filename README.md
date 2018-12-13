@@ -4,7 +4,7 @@ CS 125 Final Project
 Pytcher
 
 
-Our android app is designed around playing different pitches directly dependent on the phone's orientation. Tilting the phone will change the pitch according as per the user's whim. There are currently options for a continuous, chromatic, pentatonic, and major scale, produced with sine, sawtooth, or square waves.
+Our android app is designed around playing different pitches directly dependent on the phone's orientation. Tilting the phone will change the pitch according as per the user's whim. There are currently options for a continuous, chromatic, pentatonic, major, and minor scale, produced with sine, sawtooth, or square waves.
 
 Enjoy!
 
