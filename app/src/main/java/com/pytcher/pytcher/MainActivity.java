@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +23,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private FloatingActionButton play;
     private Context context;
     private TextView note, freq, warningText;
+    private ImageView background;
     private boolean isPlay = false, scaleLock = false;
     private final int DEFAULT_BUTTON_COLOR = 0xFFD6D7D7;
     protected final static double FREQ_LOG_BASE = 1.059463094359;
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         note = findViewById(R.id.note);
         freq = findViewById(R.id.frequency);
         mode = findViewById(R.id.modeToggle);
+        background = findViewById(R.id.noteBackground);
         warningText = findViewById(R.id.rotateWarning);
 
         playThread.start();
@@ -72,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         if (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
             accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
         } else {
             Toast.makeText(context, "No accelerometer detected", Toast.LENGTH_SHORT).show();
         }
@@ -94,8 +97,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         if (Math.abs(angleA) < 15 && Math.abs(angleB) < 15) {
             warningText.setVisibility(View.VISIBLE);
+            background.getLayoutParams().height = 700;
         } else {
             warningText.setVisibility(View.INVISIBLE);
+            background.getLayoutParams().height = 500;
         }
 
         double angle = Math.toDegrees(Math.atan2(valueY, valueX));

@@ -20,7 +20,6 @@ public class SinBuzzer implements Runnable {
     private String[] modeNames = {"Sine", "Square", "Sawtooth"};
     private int mode = SIN_WAVE;
 
-
     SinBuzzer() {
         setUpTrack();
     }
